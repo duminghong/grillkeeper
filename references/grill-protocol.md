@@ -143,7 +143,7 @@ frontier 为空？—— 否 → 下一轮 ／ 是 → 收束
 | 容量/成本粗算 | 涉及并发数、数据量、DB 往返 | 当场算量级：链路 DB 往返数 × 单次延迟；重试期望 = 1/(1-冲突率)；对照 `engineering-checklists.md` § performance-and-capacity |
 | 威胁建模 | 出现新信任边界（外部回调、用户输入、跨租户） | 过一遍输入校验/注入面/越权/凭据，对照 § secure-sdlc-and-threat-modeling |
 | 数据契约检查 | 涉及跨服务 payload / schema 演化 | 加字段 OK、改字段名禁止、版本策略；对照 § event-workflows |
-| 原型验证 | 状态机/复杂分支拿不准 | 中断访谈，生成一次性 HTML 原型（单文件、无依赖）验证分支，验证完继续 |
+| 原型验证 | 状态机/复杂分支拿不准 | 中断访谈，生成一次性 HTML 原型（单文件、无依赖）写入 `.grillkeeper/<slug>/artifacts/`，验证分支后继续 |
 | 历史记忆回查 | 话题命中本仓库既往决策 | 查 `.grillkeeper/project/CONTEXT.md` / `.grillkeeper/project/adr/` / `.grillkeeper/lint/history.json`，避免重复踩坑 |
 
 ### 叠加 5：禁止项（防止拖死节奏）
@@ -180,7 +180,7 @@ frontier 为空？—— 否 → 下一轮 ／ 是 → 收束
 │   ├── session.md          # 进行中快照：status open → closed
 │   ├── report.md           # 收束后：打磨记录（§四）+ 实施交接
 │   ├── deliverables/       # 可选，阶段五在会话内产出交付文档时的落点
-│   └── artifacts/          # 可选，仅原型验证触发时创建
+│   └── artifacts/          # 可选，仅原型验证触发：一次性 HTML 原型（叠加 4）
 ├── project/                # 跨会话共享的知识资产
 │   ├── CONTEXT.md          # 术语表（vendor 源已本地化至此路径）
 │   └── adr/NNNN-*.md       # ADR，全局连续编号（vendor 源已本地化）
