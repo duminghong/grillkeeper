@@ -33,7 +33,7 @@
 | 主题 | 权威位置 |
 |------|---------|
 | Health Score 计分（基础分 / 扣分权重 / 下限） | `vendor/brooks-lint/skills/_shared/common.md` § Health Score Calculation |
-| 项目配置 `.brooks-lint.yaml`（schema + 校验规则） | 同上 § Project Config / Config Validation |
+| 项目配置 `.grillkeeper/lint/config.yaml`（schema + 校验规则） | 同上 § Project Config / Config Validation。**注**：该路径由 vendor 源就地本地化而来（原 `.brooks-lint.yaml`），见 `vendor/SOURCES.md` § 本地修改 |
 | suppress 匹配 / Trend 行 / 历史文件格式 | 同上 § Post-Report Triage / History Tracking |
 
 **防混淆纪律（融合层规则，非摘录）**：阶段二（架构对抗审查）的扣分权重与 brooks-lint 不同——按模式各从其源，报告必须明确列出实际所用权重，禁止混用。

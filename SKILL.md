@@ -16,10 +16,12 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 
 | 层 | 位置 | 角色 |
 |---|---|---|
-| **vendor 层** | `vendor/` | 上游内容逐字副本 = **权威源**（179 文件 / ~1.35 MB） |
+| **vendor 层** | `vendor/` | 上游内容快照 = **权威源**（含路径本地化补丁，清单见 `vendor/SOURCES.md`；179 文件 / ~1.35 MB） |
 | **融合层** | `references/` + 本文件 | 索引、跨能力融合、访谈内循环 |
 
-冲突时以 vendor 为准。来源、版本、许可证见 `vendor/SOURCES.md`。vendor 文本内的 slash 引用（如 `/grilling`）一律解析为本仓库 vendor 路径，禁止解析为外部 skill 调用。
+冲突时以 vendor 为准（**唯一例外**：`vendor/SOURCES.md` § 本地修改列出的路径本地化补丁，属有意偏离，非冲突）。来源、版本、许可证见 `vendor/SOURCES.md`。vendor 文本内的 slash 引用（如 `/grilling`）一律解析为本仓库 vendor 路径，禁止解析为外部 skill 调用。
+
+**路径已本地化**：vendor 源内钉死路径的产物已**就地改写**到 `.grillkeeper/` 下（**仅路径字面量**，未动诊断标准、评分公式、风险定义），因此**不再需要解析层重定向**。改动清单与升级时的重放步骤见 `vendor/SOURCES.md` § 本地修改（fork diffs）。
 
 ## 内置能力域
 
@@ -27,7 +29,7 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 - **架构对抗审查** — 五维度扫描 + 可复现破防场景
 - **工程场景路由** — 64 个专家检查清单 + 60+ 条 exact-slug 消歧规则
 - **打磨访谈** — 设计树 + frontier 分轮推进（上游机制）+ 定基调根节点 + 每轮即时审查内循环
-- **领域建模** — 术语钉入 `CONTEXT.md`、ADR 三条件判定与落盘
+- **领域建模** — 术语钉入 `.grillkeeper/project/CONTEXT.md`、ADR 三条件判定与落盘（`.grillkeeper/project/adr/`）
 - **文档产出** — 8 种产品文档模板（vendor 全文）
 - **修复与 triage** — 修复分级、accept/dismiss/defer/skip、suppress 机制
 
@@ -75,7 +77,7 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
    - 按定基调附加检查：兼容=是 → 兼容性检查；最小改动 → 增量检查
    - 扫描分级（A 组 3 项每轮必跑 / B 组 11 项信号触发）、节点挂载门槛与 15 轮预算，见 `references/grill-protocol.md` 叠加 3
 5. **审查发现 = 挂进设计树的新节点**（以该决策为前置），随之进入 frontier；仅 🔴/🟡 级挂节点，🟢 记入残余观察
-6. **状态落盘**：基调两问落定后创建 `.grillkeeper/session.md`，每轮追加 frontier 快照与审查发现；中断重启先读它重建状态，禁止凭记忆续跑（见 grill-protocol 叠加 7）
+6. **状态落盘**：基调两问落定后创建 `.grillkeeper/<slug>/session.md`（`<slug>` 由需求主题确定性生成、目录即身份；同名目录先核对文件头主题，同主题复用、异主题加 `-2`，禁止覆盖），每轮更新 frontier 快照与审查发现；收束时把打磨记录（§四，含**实施交接**段）写入同目录 `report.md`；中断重启先扫 `.grillkeeper/*/session.md`、核对文件头主题后重建状态，禁止凭记忆续跑（见 grill-protocol 叠加 7）
 7. **找事实是 agent 的职责**：需要环境事实时派 sub-agent 查，不要问用户；不要阻塞，只让下游问题等
 8. 收束 = **frontier 为空**（设计树每个分支都走过，无默默假设）；未获用户确认前不动手实施
 
@@ -140,14 +142,14 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 
 ### 通用流程
 1. 读 `vendor/brooks-lint/skills/_shared/common.md`（Iron Law、Auto Scope Detection、Report Template）
-2. 读 `.brooks-lint.yaml`（如存在）应用配置，校验规则见 `common.md` § Config Validation
+2. 读 `.grillkeeper/lint/config.yaml`（如存在）应用配置，校验规则见 `common.md` § Config Validation
 3. 读权威风险定义：
    - 代码审查 → `vendor/brooks-lint/skills/_shared/decay-risks.md`（R1–R6）
    - 测试审查 → `vendor/brooks-lint/skills/_shared/test-decay-risks.md`（T1–T6）
    - **必须读 What Not to Flag 段**，否则误报泛滥
 4. 按 Auto Scope Detection 自动检测范围（staged → diff → branch → 全项目）
 5. 输出 Health Score（基础 100；Critical −15 / Warning −5 / Suggestion −1；下限 0）+ 四段式 Findings
-6. 追加记录到 `.brooks-lint-history.json`，报告附 Trend 行
+6. 追加记录到 `.grillkeeper/lint/history.json`，报告附 Trend 行
 
 > 风险码索引与计分速查：`references/risk-catalog.md`
 
@@ -203,7 +205,7 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 **Scope:** [文件/目录/范围描述]
 **Health Score:** XX/100（如适用）
 **Trend:** XX → XX (ΔN) over last N runs（如适用）
-**Config:** .brooks-lint.yaml applied (N risks disabled, M paths ignored)（如适用）
+**Config:** .grillkeeper/lint/config.yaml applied (N risks disabled, M paths ignored)（如适用）
 
 [一句话总体定性]
 ```
@@ -212,7 +214,7 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 ---
 **生成时间**: <ISO 8601>
 **生成工具**: Grillkeeper
-**历史记录**: 已追加到 .brooks-lint-history.json（如适用）
+**历史记录**: 已追加到 .grillkeeper/lint/history.json（如适用）
 ```
 
 ### 读取预算
@@ -227,14 +229,28 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 | 五·文档产出 | `writing-style.md` | 命中体裁的 vendor 模板 |
 
 ### 落盘路径基准
-所有产物（`CONTEXT.md`、`docs/adr/`、`.grillkeeper/session.md`、`.brooks-lint-*`、打磨记录）一律写入**用户当前工作区根目录**，运行前先确认工作区位置；禁止写入 skill 自身目录。
+**`.grillkeeper/` 是本 skill 唯一写入根**（位于用户当前工作区根目录下），运行前先确认工作区位置；禁止写入 skill 自身目录。**工作区根目录不留任何 grillkeeper 产物。**
+
+```
+.grillkeeper/
+├── README.md          # 入口索引：布局说明 + 指向下列真源（唯一对外入口）
+├── <slug>/            # 会话归档单元（会话私有）：session.md / report.md / deliverables/ / artifacts/
+├── project/           # 跨会话共享：CONTEXT.md / adr/NNNN-*.md
+├── lint/              # 阶段三/四：config.yaml / history.json
+└── deliverables/      # 阶段五交付文档（无会话时的默认落点）
+```
+
+- **入口索引**：`.grillkeeper/README.md` 在首次创建 `.grillkeeper/` 时生成（内容规则见 `references/grill-protocol.md` 叠加 7；会话清单实时扫描，不手工维护）
+- **只有 `<slug>/` 是会话私有**；`project/` 与 `lint/` 跨会话共享，**禁止**放进 `<slug>/`（否则术语表分叉、ADR 编号撞号）
+- vendor 源内钉死路径的 4 个产物已**就地改写**到上表位置（仅路径字面量；清单见 `vendor/SOURCES.md` § 本地修改），**无解析层重定向**，故 standalone 与经由 skill 走同一路径
+- 阶段五交付文档默认写 `.grillkeeper/<slug>/deliverables/`（无会话时 `.grillkeeper/deliverables/`）；**用户显式指定输出路径时以用户为准**（交付物需对项目可见，例外放行）
 
 ### 配置加载
-- 文件名 `.brooks-lint.yaml`，schema 与校验规则见 `references/risk-catalog.md` § 项目配置（权威为 `vendor/brooks-lint/skills/_shared/common.md` § Project Config）
-- 配置生效时在报告 `Scope` 行下追加 `Config: .brooks-lint.yaml applied (N risks disabled, M paths ignored)`
+- 文件名 `.grillkeeper/lint/config.yaml`（vendor 源已本地化至此路径），schema 与校验规则见 `references/risk-catalog.md` § 项目配置（权威为 `vendor/brooks-lint/skills/_shared/common.md` § Project Config）
+- 配置生效时在报告 `Scope` 行下追加 `Config: .grillkeeper/lint/config.yaml applied (N risks disabled, M paths ignored)`
 
 ### 历史追踪
-- 追加到 `.brooks-lint-history.json`：`{ date, mode, score, findings: { critical, warning, suggestion }, scope }`
+- 追加到 `.grillkeeper/lint/history.json`：`{ date, mode, score, findings: { critical, warning, suggestion }, scope }`
 - 报告含 Trend 行：`85 → 82 (−3) over last 3 runs`
 
 ### 修复模式（两层，别混）
@@ -245,7 +261,7 @@ compatibility: 自包含、无外部依赖；需可读 vendor/ 目录（179 个�
 交互式会话专属（CI/headless 跳过）。报告输出后，按严重度从低到高逐条询问：
 > accept / dismiss / defer / skip
 
-- **Dismiss**: 给一行理由 → 写入 `.brooks-lint.yaml` 的 `suppress:` 段 → 后续降级为 info
+- **Dismiss**: 给一行理由 → 写入 `.grillkeeper/lint/config.yaml` 的 `suppress:` 段 → 后续降级为 info
 - **Defer**: 同上并加 `expires: YYYY-MM-DD`（默认 90 天），到期恢复原严重度
 
 ---

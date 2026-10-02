@@ -64,7 +64,7 @@ once so later steps never have to ask.
 1a. Apply Auto Scope Detection from `../_shared/common.md` if the user did not
    specify files or a directory. Otherwise honor the user's explicit scope.
 
-1b. Read `.brooks-lint.yaml` from the project root if present. Apply `disable`,
+1b. Read `.grillkeeper/lint/config.yaml` if present. Apply `disable`,
    `severity`, `ignore`, `focus`, and `custom_risks` per common.md. Record the
    applied config values and reuse them across all iteration rounds — do not
    re-read the file in Step 6 even if files were modified.
@@ -189,7 +189,7 @@ cap, or no progress.
      to 6a.
    - **Mixed or non-critical round** (any Warning / Suggestion produced):
      increment `non_critical_rounds` by 1. If it reaches the cap (default 3,
-     or `sweep.max_iterations` from `.brooks-lint.yaml`), proceed to Step 7
+     or `sweep.max_iterations` from `.grillkeeper/lint/config.yaml`), proceed to Step 7
      with remaining non-critical findings recorded as
      `"Unresolved — iteration cap reached"`. Otherwise return to 6a.
 
@@ -222,7 +222,7 @@ Output the final report. Use the standard Report Template from
 ```
 # Brooks-Lint — Full Sweep Report
 Mode: Full Sweep | Scope: <files or directory>
-Config: .brooks-lint.yaml applied (N risks disabled, M paths ignored)   # omit if no config
+Config: .grillkeeper/lint/config.yaml applied (N risks disabled, M paths ignored)   # omit if no config
 
 ## Dimension Summary
 | Dimension | Scanned | Safe Applied | Extended Applied | Reverted | Residual |

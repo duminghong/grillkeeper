@@ -1,6 +1,6 @@
 # Custom Risk Loading Guide
 
-When `.brooks-lint.yaml` contains a `custom_risks` map, this guide governs how those
+When `.grillkeeper/lint/config.yaml` contains a `custom_risks` map, this guide governs how those
 risks are loaded and scanned. Custom risks use `Cx` codes (C1, C2, …) — no conflict with
 the standard R1–R6 and T1–T6 namespaces.
 

@@ -20,7 +20,7 @@ matter. A finding without a consequence and a remedy is not a finding — it is 
 
 ## Project Config
 
-Before executing the review, attempt to read `.brooks-lint.yaml` from the project root.
+Before executing the review, attempt to read `.grillkeeper/lint/config.yaml` (this repo's localized path for `.brooks-lint.yaml`).
 If the file exists, parse and apply its settings before proceeding.
 If the file does not exist, continue with defaults (all risks enabled, no ignores).
 
@@ -56,7 +56,7 @@ ignore:
   - "**/*.generated.*"
 ```
 
-If `.brooks-lint.yaml` contains a `custom_risks` map, read `custom-risks-guide.md`
+If `.grillkeeper/lint/config.yaml` contains a `custom_risks` map, read `custom-risks-guide.md`
 from the `_shared/` directory for loading and scanning instructions.
 
 ### Config Validation
@@ -72,7 +72,7 @@ If the YAML fails to parse entirely, skip config loading and proceed with defaul
 
 If a config file was found and applied, add this line immediately after the **Scope** line
 in the report:
-`Config: .brooks-lint.yaml applied (N risks disabled, M paths ignored)`
+`Config: .grillkeeper/lint/config.yaml applied (N risks disabled, M paths ignored)`
 
 Include N and M even if zero. Omit this line if no config file was found.
 
@@ -196,8 +196,7 @@ Floor: 0 (score cannot go below 0)
 
 ## History Tracking
 
-After generating the Health Score, attempt to append a record to `.brooks-lint-history.json`
-in the project root.
+After generating the Health Score, attempt to append a record to `.grillkeeper/lint/history.json`.
 
 **Append logic:**
 1. Read the file (or start with empty array if it doesn't exist)
@@ -221,7 +220,7 @@ After reporting Warning or Suggestion findings, offer:
 
 For each finding one at a time (lowest severity first): show title, ask `[a]ccept / [d]ismiss / [f]defer / [s]kip`; wait for reply before moving to the next.
 
-**Dismiss:** ask one-line reason → append to `.brooks-lint.yaml` under `suppress:` → downgraded to info in future runs.
+**Dismiss:** ask one-line reason → append to `.grillkeeper/lint/config.yaml` under `suppress:` → downgraded to info in future runs.
 
 **Defer:** same as dismiss, add `expires: YYYY-MM-DD` (default 90 days) → resurfaces at original severity after expiry.
 

@@ -19,7 +19,7 @@ grillkeeper/
 ├── SKILL.md                 # 主入口：阶段路由 + 五阶段流程 + 共享规则
 ├── README.md
 ├── references/              # 融合层：索引、跨能力融合、访谈内循环（5 个文件）
-└── vendor/                  # 权威层：6 个上游来源的逐字副本（179 文件 / ~1.35 MB）
+└── vendor/                  # 权威层：6 个上游来源的快照（含路径本地化补丁 / 179 文件 / ~1.35 MB）
     ├── SOURCES.md           # 来源、版本、许可证、能力映射表
     ├── brooks-lint/         # 代码/测试质量诊断六模式（MIT © hyhmrright）
     ├── staff-engineer-mode/ # 64 个工程专家 + 路由矩阵 + 71 模板（MIT © sirmarkz）
@@ -29,7 +29,7 @@ grillkeeper/
     └── domain-modeling/     # CONTEXT.md 术语表 + ADR 格式与判定
 ```
 
-**双层约定**：`vendor/` 是权威源（canonical），逐字复制、零改写失真；`references/` 只做导航与跨能力融合，不重复定义诊断问题、评分公式或检查项。**冲突时以 vendor 为准**。详见 [vendor/SOURCES.md](vendor/SOURCES.md)。
+**双层约定**：`vendor/` 是权威源（canonical）——上游内容快照，除 `vendor/SOURCES.md` § 本地修改（fork diffs）列出的**路径本地化补丁**外逐字；`references/` 只做导航与跨能力融合，不重复定义诊断问题、评分公式或检查项。**冲突时以 vendor 为准**（唯一例外：上述路径补丁属有意偏离）。详见 [vendor/SOURCES.md](vendor/SOURCES.md)。
 
 ---
 
@@ -53,10 +53,11 @@ grillkeeper/
 |------|------|
 | **定基调根节点** | 第一轮必问"是否需要向后兼容"+"按最彻底还是最小改动"，模糊回答逼二选一；答案改变后续所有轮次口径 |
 | **即时审查内循环** | 每轮收到回答后立即做对抗性扫描（共 14 项：断头路/自相矛盾/越权依赖 3 项每轮必跑，CAP 矛盾/破防场景回归/术语钉住/可测性/复用-YAGNI 等 11 项信号触发），🔴/🟡 发现**挂为设计树新节点**随 frontier 推进；15 轮未收束则强制盘点残余节点 |
-| **会话状态落盘** | 基调落定后创建 `.grillkeeper/session.md`，每轮追加 frontier 快照与审查发现；中断后读文件重建状态，不凭记忆续跑 |
+| **会话产物落盘** | 唯一写入根 `.grillkeeper/`，工作区根目录零残留：`README.md` 入口索引，会话私有 `<slug>/{session.md,report.md,deliverables/,artifacts/}`，跨会话共享 `project/{CONTEXT.md,adr/}` 与 `lint/{config.yaml,history.json}`；`<slug>` 由需求主题确定性生成、目录即身份（同名核对主题，同主题复用、异主题加 `-2`，禁止覆盖）；收束时写 `report.md`（打磨记录 + **实施交接**）并把 `session.md` 置 `closed`；中断后扫 `*/session.md` 核对主题重建状态 |
+| **实施交接** | 收束报告内置可执行交接段：非目标 / 改动面 / 关键决策理由 / 实施顺序 / 验收清单（可测性汇总 + 破防场景转回归项），使下游不必回读访谈过程即可动手 |
 | **条件触发能力** | 命中信号才跑：容量/成本粗算、威胁建模、数据契约检查、原型验证、历史记忆回查 |
 | **禁止项** | 内循环不跑：完整 Mermaid 依赖图重绘、Health Score 每轮重算、全量十二书风险扫描 |
-| **领域建模落盘** | 术语当场钉入 `CONTEXT.md`（含 `_Avoid_` 同义词）；ADR 克制——"难逆转 + 无上下文则困惑 + 真实权衡"三条件全真才写 |
+| **领域建模落盘** | 术语当场钉入 `.grillkeeper/project/CONTEXT.md`（含 `_Avoid_` 同义词）；ADR 克制——"难逆转 + 无上下文则困惑 + 真实权衡"三条件全真才写 |
 
 ### 2. 架构对抗审查
 
@@ -94,8 +95,8 @@ grillkeeper/
 
 - **风险库**：6 大代码衰减风险 R1–R6（认知过载 / 变更传播 / 知识重复 / 偶然复杂度 / 依赖失序 / 领域模型扭曲）+ 6 大测试衰减风险 T1–T6（测试晦涩 / 脆弱 / 重复 / Mock 滥用 / 覆盖率幻觉 / 架构错配），每个含症状明细、书目溯源、严重度指南、**What Not to Flag 反噪音段**
 - **Health Score**：基础 100；Critical −15 / Warning −5 / Suggestion −1；下限 0
-- **项目配置**：`.brooks-lint.yaml`（disable / severity / ignore / focus / custom_risks / suppress）
-- **历史趋势**：`.brooks-lint-history.json`，报告附 Trend 行（如 `85 → 82 (−3) over last 3 runs`）
+- **项目配置**：`.grillkeeper/lint/config.yaml`（disable / severity / ignore / focus / custom_risks / suppress）
+- **历史趋势**：`.grillkeeper/lint/history.json`，报告附 Trend 行（如 `85 → 82 (−3) over last 3 runs`）
 - **Post-Report Triage**：交互式逐条 accept / dismiss / defer / skip；dismiss/defer 写入 suppress，支持到期复活
 
 **修复分两层，别混**：
@@ -158,4 +159,4 @@ grillkeeper/
 
 ## 升级
 
-vendor 副本是快照，不自动跟随上游。升级时重新复制上游目录覆盖 `vendor/<origin>/`，并同步更新 `vendor/SOURCES.md` 中的版本号。
+vendor 副本是快照，不自动跟随上游。升级步骤（重铺 → **重放 fork diffs** → grep 核对 + 打包改名）见 [vendor/SOURCES.md](vendor/SOURCES.md) § 上游更新。**勿凭本段记忆操作**——只重铺不重放补丁会静默丢掉全部路径本地化。

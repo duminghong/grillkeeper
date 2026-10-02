@@ -1,6 +1,8 @@
 # 来源与许可（SOURCES）
 
-本目录是**第三方内容的逐字 vendor 副本**，上游为本地已安装的 skill。保留原文以确保能力完整、零改写失真。
+本目录主体是**第三方内容的上游快照**，上游为本地已安装的 skill，保留原文以确保能力完整。
+
+**例外**：为把该 skill 的全部产物约束到 `.grillkeeper/` 下，对**路径字面量**做了本地补丁（**只改路径，不含任何诊断标准、评分公式、风险定义、书目溯源**）。因此本目录**不是逐字副本**——完整清单见下方「本地修改（fork diffs）」，该清单是升级时的重放依据。
 
 ## 来源清单
 
@@ -17,10 +19,31 @@
 
 ## 完整性说明
 
-- 六个来源的**能力文件（`skills/**`、`SKILL.disabled.md`、`references/`、`specialists/`、`assets/`）已 100% 逐字 vendor，无遗漏**。未收录的只有打包/营销类文件（`plugin.json`、`package.json`、`README.md`、`SECURITY.md`、图标、`.success`、`.codexignore`、`agents/openai.yaml`），它们不承载能力。
+- 六个来源的**能力文件（`skills/**`、`SKILL.disabled.md`、`references/`、`specialists/`、`assets/`）已 100% vendor，无遗漏**（除「本地修改」一节列出的路径补丁外逐字）。未收录的只有打包/营销类文件（`plugin.json`、`package.json`、`README.md`、`SECURITY.md`、图标、`.success`、`.codexignore`、`agents/openai.yaml`），它们不承载能力。
 - `references/adversarial-review-checklist.md` 是从 `architecture-breaker-review/SKILL.disabled.md` 提炼的融合层清单，原文保留在 `vendor/`。
 - `references/grill-protocol.md` **不是自研替代品**：它以 `vendor/grilling/SKILL.disabled.md` 的设计树/frontier 机制为骨架，只在其上叠加"即时审查内循环"；术语与 ADR 格式遵循 `vendor/domain-modeling/`。
 - `domain-modeling` 的格式文件被 `references/grill-protocol.md` 叠加 6 直接引用（术语表 / ADR 格式权威），故一并 vendor 以满足自包含要求。
+
+## 本地修改（fork diffs）
+
+**目的**：`.grillkeeper/` 是本 skill 的唯一写入根，故将上游钉死在 project root / repo root 的路径改写到 `.grillkeeper/` 下。**仅改路径字符串**，未改任何诊断标准、评分公式、风险码、严重度定义与书目溯源。
+
+| 文件 | 上游原文 | 本地改为 |
+|---|---|---|
+| `brooks-lint/skills/_shared/common.md` | `.brooks-lint.yaml`（project root） | `.grillkeeper/lint/config.yaml` |
+| 同上 | `.brooks-lint-history.json` | `.grillkeeper/lint/history.json` |
+| `brooks-lint/skills/_shared/custom-risks-guide.md` | `.brooks-lint.yaml` | `.grillkeeper/lint/config.yaml` |
+| `brooks-lint/skills/brooks-sweep/sweep-guide.md` | `.brooks-lint.yaml` | `.grillkeeper/lint/config.yaml` |
+| `domain-modeling/SKILL.disabled.md` | root `CONTEXT.md` / `docs/adr/` | `.grillkeeper/project/CONTEXT.md` / `.grillkeeper/project/adr/` |
+| `domain-modeling/CONTEXT-FORMAT.md` | root `CONTEXT.md` / `CONTEXT-MAP.md` | `.grillkeeper/project/` 下同名文件 |
+| `domain-modeling/ADR-FORMAT.md` | `docs/adr/` | `.grillkeeper/project/adr/` |
+
+**有意保留未改**（改了反而错）：
+
+- `domain-modeling/SKILL.disabled.md` 多上下文示例中 `src/<ctx>/CONTEXT.md`、`src/<ctx>/docs/adr/` —— 这是**per-package 局部路径**，不属于 `.grillkeeper/` 管辖范围，示例语义就是"每个包自己有一份"。
+- `common.md:23` 括号内 "(this repo's localized path for `.brooks-lint.yaml`)" —— 保留上游名，便于溯源对照。
+
+**这不影响独立可运行性**：`CONTEXT.md` 与 `docs/adr/` 的缺失只是降级（行为仍正确）；`.grillkeeper/lint/config.yaml` 是本仓库的固定约定，无论经由 grillkeeper 还是直接加载 vendor skill，读的是同一路径，**不再存在"standalone 读不到配置"的静默失效**。
 
 ## 使用约定
 
@@ -51,7 +74,14 @@
 
 ## 上游更新
 
-vendor 副本是**快照**，不会自动跟随上游。升级步骤：重新复制上游目录覆盖 `vendor/<origin>/`，并同步更新本文件的版本号。
+vendor 副本是**快照**，不会自动跟随上游。升级步骤：
+
+1. 重新复制上游目录覆盖 `vendor/<origin>/`，并同步更新本文件的版本号
+2. **重放「本地修改（fork diffs）」表**——重铺上游会覆盖全部路径补丁
+3. 核对补丁重放完整（两个互补断言，缺一不可）：
+   - **旧形态将消失**：`grep -rn "brooks-lint\.yaml\|brooks-lint-history\|docs/adr" vendor/` 应只剩溯源标注与 per-package 示例
+   - **新形态必存在**：`grep -rl "\.grillkeeper/" vendor/` 必须命中 `brooks-lint/skills/_shared/common.md`、`brooks-lint/skills/brooks-sweep/sweep-guide.md`、`domain-modeling/SKILL.disabled.md`、`domain-modeling/CONTEXT-FORMAT.md`、`domain-modeling/ADR-FORMAT.md`
+   - **注**：比对模式**不含** `CONTEXT\.md`——新路径 `.grillkeeper/project/CONTEXT.md` 本身即含该子串，纳入会令期望永不可满足（假断言）
 
 > **打包约定（必做）**：重铺上游后，把 vendor 内的所有 `SKILL.md` 改名为 `SKILL.disabled.md`。否则宿主若用递归扫描（`**/SKILL.md`）发现 skill，会把 vendor 里 11 个上游 skill 注册成独立 skill——与"禁止外部 skill 分流"约束冲突，且与用户已装的同名 skill（grilling / domain-modeling / brooks-* / staff-engineer-mode 等）撞名。
 
